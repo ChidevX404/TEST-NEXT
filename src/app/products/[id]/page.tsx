@@ -1,89 +1,67 @@
-import Link from 'next/link'
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input" // อย่าลืม npx shadcn@latest add input
-
-interface ProductsPageProps {
-  searchParams: Promise<{
-    search?: string;
+interface ProductDetailPageProps {
+  params: Promise<{
+    id: string;
   }>;
 }
 
 const products = [
-  { id: 1, name: 'โทรศัพท์มือถือ Samsung Galaxy S24', price: 25900, category: 'phone' },
-  { id: 2, name: 'โน้ตบุ๊ก MacBook Air M3', price: 42900, category: 'laptop' },
-  { id: 3, name: 'หูฟังไร้สาย AirPods Pro', price: 8990, category: 'audio' },
-  { id: 4, name: 'แท็บเล็ต iPad Air', price: 21900, category: 'tablet' },
-  { id: 5, name: 'โทรศัพท์มือถือ iPhone 15 Pro', price: 39900, category: 'phone' },
-  { id: 6, name: 'หูฟัง Sony WH-1000XM3', price: 12900, category: 'audio' },
+  {
+    id: 1,
+    name: 'โทรศัพท์มือถือ Samsung Galaxy S24',
+    price: 25900,
+    description: 'สมาร์ตโฟนเรือธงพร้อมชิปประมวลผลรุ่นใหม่และกล้องคุณภาพสูง',
+  },
+  {
+    id: 2,
+    name: 'โน้ตบุ๊ก MacBook Air M3',
+    price: 42900,
+    description: 'โน้ตบุ๊กบางเบาที่มาพร้อมชิป Apple M3 และแบตเตอรี่ใช้งานได้ตลอดวัน',
+  },
+  {
+    id: 3,
+    name: 'หูฟังไร้สาย AirPods Pro',
+    price: 8990,
+    description: 'หูฟังตัดเสียงรบกวน Active Noise Cancellation และ Spatial Audio',
+  },
+  {
+    id: 4,
+    name: 'แท็บเล็ต iPad Air',
+    price: 21900,
+    description: 'แท็บเล็ตหน้าจอ Liquid Retina ขนาด 11 นิ้ว รองรับ Apple Pencil',
+  },
 ];
 
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  // 1. เข้าถึง searchParams ด้วย await (Next.js 16)
-  const { search } = await searchParams;
+export default async function ProductDetailPage({
+  params,
+}: ProductDetailPageProps) {
+  const { id } = await params;
+  const product = products.find((p) => p.id === parseInt(id));
 
-  // 2. กรองข้อมูลสินค้าตามคำค้นหา (Server-side Filtering)
-  const filteredProducts = search
-    ? products.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-      )
-    : products;
+  if (!product) {
+    return (
+      <main style={{ padding: '2rem' }}>
+        <h1>ไม่พบสินค้าที่คุณค้นหา</h1>
+        <p>กรุณาตรวจสอบรหัสสินค้าอีกครั้ง</p>
+      </main>
+    );
+  }
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-slate-900">รายการสินค้า</h1>
-
-      {/* 3. ฟอร์มค้นหาที่ส่งค่าผ่าน URL Query Parameters */}
-      <form className="mb-8 max-w-md">
-        <div className="flex gap-2">
-          <Input 
-            type="text" 
-            name="search" 
-            placeholder="ค้นหาสินค้า..." 
-            defaultValue={search || ''} 
-          />
-          <Button type="submit">ค้นหา</Button>
-        </div>
-      </form>
-
-      {filteredProducts.length === 0 ? (
-        <p className="text-slate-500">ไม่พบสินค้าที่ตรงกับ "{search}"</p>
-      ) : (
-        <>
-          <p className="mb-4 text-slate-600">
-            พบ {filteredProducts.length} รายการ {search && `สำหรับ "${search}"`}
-          </p>
-          
-          {/* 4. แสดงผลสินค้าแบบ Grid ด้วย Card component */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="flex flex-col">
-                <CardHeader>
-                  <CardTitle className="text-xl line-clamp-1">{product.name}</CardTitle>
-                  <CardDescription>{product.category.toUpperCase()}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-2xl font-bold text-blue-600">
-                    ฿{product.price.toLocaleString()}
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link href={`/products/${product.id}`}>รายละเอียดสินค้า</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
+    <main style={{ padding: '2rem' }}>
+      <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{product.name}</h1>
+      <div
+        style={{
+          backgroundColor: '#f5f5f5',
+          padding: '2rem',
+          borderRadius: '8px',
+          marginBottom: '1rem',
+        }}
+      >
+        <p style={{ fontSize: '1.5rem', color: '#0070f3', fontWeight: 'bold' }}>
+          ฿{product.price.toLocaleString()}
+        </p>
+      </div>
+      <p style={{ lineHeight: '1.6', color: '#666' }}>{product.description}</p>
     </main>
   );
 }

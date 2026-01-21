@@ -1,81 +1,89 @@
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Car } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'next/link'
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/src/components/ui/card"
+import { Button } from "@/src/components/ui/button"
+import { Input } from "@/src/components/ui/input" // อย่าลืม npx shadcn@latest add input
 
+interface ProductsPageProps {
+  searchParams: Promise<{
+    search?: string;
+  }>;
+}
 
-export default function Home() {
+const products = [
+  { id: 1, name: 'โทรศัพท์มือถือ Samsung Galaxy S24', price: 25900, category: 'phone' },
+  { id: 2, name: 'โน้ตบุ๊ก MacBook Air M3', price: 42900, category: 'laptop' },
+  { id: 3, name: 'หูฟังไร้สาย AirPods Pro', price: 8990, category: 'audio' },
+  { id: 4, name: 'แท็บเล็ต iPad Air', price: 21900, category: 'tablet' },
+  { id: 5, name: 'โทรศัพท์มือถือ iPhone 15 Pro', price: 39900, category: 'phone' },
+  { id: 6, name: 'หูฟัง Sony WH-1000XM3', price: 12900, category: 'audio' },
+];
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  // 1. เข้าถึง searchParams ด้วย await (Next.js 16)
+  const { search } = await searchParams;
+
+  // 2. กรองข้อมูลสินค้าตามคำค้นหา (Server-side Filtering)
+  const filteredProducts = search
+    ? products.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+      )
+    : products;
+
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-50 to-slate-100">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-slate-900 mb-4">
-            ยินดีต้อนรับสู่ My Next.js 16
-          </h1>
-          <p className="text-xl text-slate-600 mb-8">
-            สร้าง web แอปพลิเคชันด้วย Next.js, TypeScript, Tailwind CSS และ shadcn/ui
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 text-slate-900">รายการสินค้า</h1>
+
+      {/* 3. ฟอร์มค้นหาที่ส่งค่าผ่าน URL Query Parameters */}
+      <form className="mb-8 max-w-md">
+        <div className="flex gap-2">
+          <Input 
+            type="text" 
+            name="search" 
+            placeholder="ค้นหาสินค้า..." 
+            defaultValue={search || ''} 
+          />
+          <Button type="submit">ค้นหา</Button>
+        </div>
+      </form>
+
+      {filteredProducts.length === 0 ? (
+        <p className="text-slate-500">ไม่พบสินค้าที่ตรงกับ "{search}"</p>
+      ) : (
+        <>
+          <p className="mb-4 text-slate-600">
+            พบ {filteredProducts.length} รายการ {search && `สำหรับ "${search}"`}
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button asChild size="lg">
-              <Link href="/products">ดูสินค้า</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/about">เกี่ยวกับเรา</Link>
-            </Button>
+          
+          {/* 4. แสดงผลสินค้าแบบ Grid ด้วย Card component */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="text-xl line-clamp-1">{product.name}</CardTitle>
+                  <CardDescription>{product.category.toUpperCase()}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-2xl font-bold text-blue-600">
+                    ฿{product.price.toLocaleString()}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full">
+                    <Link href={`/products/${product.id}`}>รายละเอียดสินค้า</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>⚡รวดเร็วทันใจ</CardTitle>
-              <CardDescription>
-                ประสิทธิภาพสูงด้วย Server Components และ Cache Component
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">
-                Next.js 16 มาพร้อมกับฟีเจอร์ใหม่ที่ช่วยเพิ่มประสิทธิภาพให้เว็บแอปพลิเคชันของคุณโหลดได้รวดเร็วขึ้นและตอบสนองได้ดีขึ้น
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🎨 สวยงาม</CardTitle>
-              <CardDescription>
-                ออกแบบด้วย Tailwind CSS และ shadcn/ui
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">
-                สร้าง UI ที่สวยงามและ responsive ได้อย่างรวดเร็วด้วย utility-first CSS
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>🔧 ปรับแต่งได้</CardTitle>
-              <CardDescription>
-                เป็นเจ้าของโค้ด components ของคุณเอง
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">
-                shadcn/ui ให้คุณ copy โค้ดมาใช้ ทำให้ปรับแต่งได้ตามต้องการอย่างเต็มที่
-              </p>
-            </CardContent>
-          </Card>
-
-        </div>
-      </div>
+        </>
+      )}
     </main>
-  )
+  );
 }
